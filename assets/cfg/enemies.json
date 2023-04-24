@@ -1,20 +1,20 @@
 {
-    "TypeA": {
+    "AsteroidA": {
         "image": "assets/img/asteroid_01.png",
         "velocity_min": 25,
         "velocity_max": 50
     },
-    "TypeB": {
+    "AsteroidB": {
         "image": "assets/img/asteroid_02.png",
         "velocity_min": 50,
         "velocity_max": 75
     },
-    "TypeC": {
+    "AsteroidC": {
         "image": "assets/img/asteroid_03.png",
         "velocity_min": 75,
         "velocity_max": 100
     },
-    "TypeD": {
+    "AsteroidD": {
         "image": "assets/img/asteroid_04.png",
         "velocity_min": 100,
         "velocity_max": 125

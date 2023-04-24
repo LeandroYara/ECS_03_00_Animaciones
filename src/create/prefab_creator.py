@@ -1,15 +1,19 @@
+import copy
 import random
 import pygame
 import esper
 from src.ecs.components.c_animation import CAnimation
 
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
+from src.ecs.components.c_hunter_state import CHunterState
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_player_state import CPlayerState
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
+from src.ecs.components.tags.c_tag_explosion import CTagExplosion
+from src.ecs.components.tags.c_tag_hunter import CTagHunter
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 
@@ -46,6 +50,25 @@ def create_enemy_square(world: esper.World, pos: pygame.Vector2, enemy_info: dic
                               random.choice([-vel_range, vel_range]))
     enemy_entity = create_sprite(world, pos, velocity, enemy_surface)
     world.add_component(enemy_entity, CTagEnemy())
+    
+
+def create_enemy_hunter(world: esper.World, pos: pygame.Vector2, enemy_info: dict) -> int:
+    hunter_sprite = pygame.image.load(enemy_info["image"]).convert_alpha()
+    size = hunter_sprite.get_size()
+    size = (size[0] / enemy_info["animations"]["number_frames"], size[1])
+    c_pos = pygame.Vector2(pos.x - (size[0] / 2),
+                        pos.y - (size[1] / 2))
+    vel = pygame.Vector2(0, 0)
+    dis_chase = enemy_info["distance_start_chase"]
+    dis_return = enemy_info["distance_start_return"]
+    vel_chase = enemy_info["velocity_chase"]
+    vel_return = enemy_info["velocity_return"]
+    hunter_entity = create_sprite(world, c_pos, vel, hunter_sprite)
+    nc_pos = copy.deepcopy(c_pos)
+    world.add_component(hunter_entity, CTagHunter(dis_chase, dis_return, vel_chase, vel_return, nc_pos))
+    world.add_component(hunter_entity, CAnimation(enemy_info["animations"]))
+    world.add_component(hunter_entity, CHunterState())
+    return hunter_entity
 
 
 def create_player_square(world: esper.World, player_info: dict, player_lvl_info: dict) -> int:
@@ -60,6 +83,19 @@ def create_player_square(world: esper.World, player_info: dict, player_lvl_info:
     world.add_component(player_entity, CAnimation(player_info["animations"]))
     world.add_component(player_entity, CPlayerState())
     return player_entity
+
+
+def create_explosion(world:esper.World, entity_pos:pygame.Vector2, entity_size:pygame.Vector2, explosion_info:dict):
+    explosion_sprite = pygame.image.load(explosion_info["image"])
+    explosion_size = explosion_sprite.get_rect().size
+    explosion_size = (explosion_size[0] / explosion_info["animations"]["number_frames"], explosion_size[1])
+    pos = pygame.Vector2(entity_pos.x + (entity_size[0] / 2) - (explosion_size[0] / 2),
+                         entity_pos.y + (entity_size[1] / 2) - (explosion_size[1] / 2))
+    vel = pygame.Vector2(0, 0)
+    explosion_entity = create_sprite(world, pos, vel, explosion_sprite)
+    world.add_component(explosion_entity, CTagExplosion(0))
+    world.add_component(explosion_entity, CAnimation(explosion_info["animations"]))
+    return explosion_entity
 
 
 def create_enemy_spawner(world: esper.World, level_data: dict):
